@@ -1,6 +1,7 @@
-<h1>The Batting Stats For the Marlins</h1>
-<% @marlins.each do |entry| %>
+<h1>Current Marlins OPS</h1>
+
 <ul>
-  <li><%= entry %></li>
+  <% @battingstats.each do |battingstat|  %>
+  <li> <%= battingstat.ops %></li>
 </ul>
 <% end %>

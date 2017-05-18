@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-    root 'batting_stats#team_batting_stats'
+    root 'batting_stats#scrape_espn'
 
     resources :batting_stats
 

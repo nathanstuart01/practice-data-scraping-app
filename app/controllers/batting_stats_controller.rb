@@ -1,8 +1,7 @@
 class BattingStatsController < ApplicationController
 
 
-  def team_batting_stats
+  def scrape_espn
     @battingstats = BattingStat.all
-    render template: 'scrape_espn'
   end
 end

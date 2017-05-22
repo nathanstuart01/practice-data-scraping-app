@@ -1,195 +1,89 @@
 namespace :fetch_batting_stats do
 
-  desc "Collect OPS Stats"
+  desc "Collect Batting War Stats"
   task collect_batting_stats: :environment do
 
     require 'open-uri'
     require 'nokogiri'
 
-    url = "http://www.espn.com/mlb/stats/team/_/stat/batting"
+    url = "http://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=0&type=8&season=2017&month=0&season1=2017&ind=0&team=0,ts&rost=&age=&filter=&players=0"
     document = open(url)
     content =  document.read
     @parsed_content = Nokogiri::HTML(content)
 
-    @nationals = Array.new
-    @parsed_content.css('.oddrow.team-10-20').css('td').each do |td|
-      @nationals << td.text
-    end
-    BattingStat.create(ops: @nationals.last.to_f, team_batting: 'nationals')
+    @unsorted_batting_data = Array.new
 
-    @yankees = Array.new
-    @parsed_content.css('.evenrow.team-10-10').css('td').each do |td|
-      @yankees << td.text
+    @parsed_content.css('.grid_line_regular').css('td').each do |td|
+      @unsorted_batting_data << td.text
     end
-    BattingStat.create(ops: @yankees.last.to_f, team_batting: 'yankees')
+    #BattingStat.create(ops: @nationals.last.to_f, team_batting: 'nationals')
+    puts "Batting Date Collected"
+  end
 
-    @brewers = Array.new
-    @parsed_content.css('.oddrow.team-10-8').css('td').each do |td|
-      @brewers << td.text
-    end
-    BattingStat.create(ops: @brewers.last.to_f, team_batting: 'brewers')
+  desc "Save Batting War Stats to CSV"
+  task save_batting_stats_to_csv: :environment do
+    require 'csv'
 
-    @astros = Array.new
-    @parsed_content.css('.evenrow.team-10-18').css('td').each do |td|
-      @astros << td.text
-    end
-    BattingStat.create(ops: @astros.last.to_f, team_batting: 'astros')
+    CSV.open('batting_war_test.csv', 'wb') do |csv|
+      csv << @unsorted_batting_data[0..16]
+      csv << @unsorted_batting_data[17..33]
+      csv << @unsorted_batting_data[34..50]
+      csv << @unsorted_batting_data[51..67]
+      csv << @unsorted_batting_data[68..84]
+      csv << @unsorted_batting_data[85..101]
+      csv << @unsorted_batting_data[102..118]
+      csv << @unsorted_batting_data[119..135]
+      csv << @unsorted_batting_data[136..152]
+      csv << @unsorted_batting_data[153..169]
+      csv << @unsorted_batting_data[170..186]
+      csv << @unsorted_batting_data[187..203]
+      csv << @unsorted_batting_data[204..220]
+      csv << @unsorted_batting_data[221..237]
+      csv << @unsorted_batting_data[238..254]
+      csv << @unsorted_batting_data[255..271]
+      csv << @unsorted_batting_data[272..288]
+      csv << @unsorted_batting_data[289..305]
+      csv << @unsorted_batting_data[306..322]
+      csv << @unsorted_batting_data[323..339]
+      csv << @unsorted_batting_data[340..356]
+      csv << @unsorted_batting_data[357..373]
+      csv << @unsorted_batting_data[374..390]
+      csv << @unsorted_batting_data[391..407]
+      csv << @unsorted_batting_data[408..424]
+      csv << @unsorted_batting_data[425..441]
+      csv << @unsorted_batting_data[442..458]
+      csv << @unsorted_batting_data[459..475]
+      csv << @unsorted_batting_data[476..492]
+      csv << @unsorted_batting_data[493..509]
+      end
+      puts 'CSV file created and saved'
+  end
 
-    @diamondbacks = Array.new
-    @parsed_content.css('.oddrow.team-10-29').css('td').each do |td|
-      @diamondbacks << td.text
-    end
-    BattingStat.create(ops: @diamondbacks.last.to_f, team_batting: 'diamondbacks')
+  desc "Turn Batting CSV file batting stats in hash of team key and war values"
+  task turn_batting_csv_into_batting_hash: :environment do
 
-    @dodgers = Array.new
-    @parsed_content.css('.evenrow.team-10-19').css('td').each do |td|
-      @dodgers << td.text
-    end
-    BattingStat.create(ops: @dodgers.last.to_f, team_batting: 'dodgers')
+    @raw_csv_batting_data = Array.new
+    @batting_teams = Array.new
+    @batting_war_strings = Array.new
+    @batting_war_float = Array.new
 
-    @rays = Array.new
-    @parsed_content.css('.oddrow.team-10-30').css('td').each do |td|
-      @rays << td.text
-    end
-    BattingStat.create(ops: @rays.last.to_f, team_batting: 'rays')
 
-    @mariners = Array.new
-    @parsed_content.css('.evenrow.team-10-12').css('td').each do |td|
-      @mariners << td.text
+    CSV.foreach('batting_war_test.csv') do |row|
+      @raw_csv_batting_data << row[0,17]
     end
-    BattingStat.create(ops: @mariners.last.to_f, team_batting: 'mariners')
 
-    @mets = Array.new
-    @parsed_content.css('.oddrow.team-10-21').css('td').each do |td|
-      @mets << td.text
-    end
-    BattingStat.create(ops: @mets.last.to_f, team_batting: 'mets')
+    @batting_teams = @raw_csv_batting_data.map { |team| team[1] }
 
-    @rangers = Array.new
-    @parsed_content.css('.evenrow.team-10-13').css('td').each do |td|
-      @rangers << td.text
-    end
-    BattingStat.create(ops: @rangers.last.to_f, team_batting: 'rangers')
+    @batting_war_strings = @raw_csv_batting_data.map { |war| war[16] }
 
-    @rockies = Array.new
-    @parsed_content.css('.oddrow.team-10-27').css('td').each do |td|
-      @rockies << td.text
+    @batting_war_float = @batting_war_strings.collect do |war|
+      war.to_f
     end
-    BattingStat.create(ops: @rockies.last.to_f, team_batting: 'rockies')
 
-    @reds = Array.new
-    @parsed_content.css('.evenrow.team-10-17').css('td').each do |td|
-      @reds << td.text
-    end
-    BattingStat.create(ops: @reds.last.to_f, team_batting: "reds")
+    @filtered_batting_data = [@batting_teams, @batting_war_float].transpose.to_h
 
-    @cubs = Array.new
-    @parsed_content.css('.oddrow.team-10-16').css('td').each do |td|
-      @cubs << td.text
-    end
-    BattingStat.create(ops: @cubs.last.to_f, team_batting: 'cubs')
-
-    @tigers = Array.new
-    @parsed_content.css('.evenrow.team-10-6').css('td').each do |td|
-      @tigers << td.text
-    end
-    BattingStat.create(ops: @tigers.last.to_f, team_batting: "tigers")
-
-    @orioles = Array.new
-    @parsed_content.css('.oddrow.team-10-1').css('td').each do |td|
-      @orioles << td.text
-    end
-    BattingStat.create(ops: @orioles.last.to_f, team_batting: "orioles")
-
-    @redsox = Array.new
-    @parsed_content.css('.evenrow.team-10-2').css('td').each do |td|
-      @redsox << td.text
-    end
-    BattingStat.create(ops: @redsox.last.to_f, team_batting: "red sox")
-
-    @angels = Array.new
-    @parsed_content.css('.oddrow.team-10-3').css('td').each do |td|
-      @angels << td.text
-    end
-    BattingStat.create(ops: @angels.last.to_f, team_batting: "angels")
-
-    @braves = Array.new
-    @parsed_content.css('.evenrow.team-10-15').css('td').each do |td|
-      @braves << td.text
-    end
-    BattingStat.create(ops: @braves.last.to_f, team_batting: "braves")
-
-    @cardinals = Array.new
-    @parsed_content.css('.oddrow.team-10-24').css('td').each do |td|
-      @cardinals << td.text
-    end
-    BattingStat.create(ops: @cardinals.last.to_f, team_batting: "cardinals")
-
-    @phillies = Array.new
-    @parsed_content.css('.evenrow.team-10-22').css('td').each do |td|
-      @phillies << td.text
-    end
-    BattingStat.create(ops: @phillies.last.to_f, team_batting: "phillies")
-
-    @indians = Array.new
-    @parsed_content.css('.oddrow.team-10-5').css('td').each do |td|
-      @indians << td.text
-    end
-    BattingStat.create(ops: @indians.last.to_f, team_batting: "indians")
-
-    @bluejays = Array.new
-    @parsed_content.css('.evenrow.team-10-14').css('td').each do |td|
-      @bluejays << td.text
-    end
-    BattingStat.create(ops: @bluejays.last.to_f, team_batting: "blue jays")
-
-    @whitesox = Array.new
-    @parsed_content.css('.oddrow.team-10-4').css('td').each do |td|
-      @whitesox << td.text
-    end
-    BattingStat.create(ops: @whitesox.last.to_f, team_batting: "white sox")
-
-    @marlins = Array.new
-    @parsed_content.css('.evenrow.team-10-28').css('td').each do |td|
-      @marlins << td.text
-    end
-    BattingStat.create(ops: @marlins.last.to_f, team_batting: "marlins")
-
-    @twins = Array.new
-    @parsed_content.css('.oddrow.team-10-9').css('td').each do |td|
-      @twins << td.text
-    end
-    BattingStat.create(ops: @twins.last.to_f, team_batting: "twins")
-
-    @athletics = Array.new
-    @parsed_content.css('.evenrow.team-10-11').css('td').each do |td|
-      @athletics << td.text
-    end
-    BattingStat.create(ops: @athletics.last.to_f, team_batting: "athletics")
-
-    @padres = Array.new
-    @parsed_content.css('.oddrow.team-10-25').css('td').each do |td|
-      @padres << td.text
-    end
-    BattingStat.create(ops: @padres.last.to_f, team_batting: "padres")
-
-    @pirates = Array.new
-    @parsed_content.css('.evenrow.team-10-23').css('td').each do |td|
-      @pirates << td.text
-    end
-    BattingStat.create(ops: @pirates.last.to_f, team_batting: "pirates")
-
-    @giants = Array.new
-    @parsed_content.css('.oddrow.team-10-26').css('td').each do |td|
-      @giants << td.text
-    end
-    BattingStat.create(ops: @giants.last.to_f, team_batting: "giants")
-
-    @royals = Array.new
-    @parsed_content.css('.evenrow.team-10-7').css('td').each do |td|
-      @royals << td.text
-    end
-    BattingStat.create(ops: @royals.last.to_f, team_batting: "royals")
+    puts @filtered_batting_data
 
   end
+
 end

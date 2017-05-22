@@ -1,7 +1,7 @@
 class BattingStatsController < ApplicationController
 
 
-  def scrape_espn
+  def scraped_batting_wars
     @battingstats = BattingStat.all
   end
 end

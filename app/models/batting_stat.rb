@@ -1,4 +1,5 @@
 class BattingStat < ApplicationRecord
-  validates_presence_of :ops, :team_batting
+    validates_presence_of :war, :team_batting
+    
 
 end

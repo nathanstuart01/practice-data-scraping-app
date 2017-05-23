@@ -1,4 +1,4 @@
-<h1>Current Marlins OPS</h1>
+<h1>Current Batting WARs</h1>
 
 <ul>
   <% @battingstats.each do |battingstat|  %>
@@ -6,3 +6,5 @@
   <li> <%= battingstat.team_batting %></li>
 </ul>
 <% end %>
+
+<%= link_to "Pitching WARs", :root %>

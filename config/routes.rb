@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
 
-    root 'batting_stats#scraped_batting_wars'
+    root 'pitching_stats#scraped_pitching_wars'
 
-    resources :batting_stats
     resources :pitching_stats
+
+
+    get 'scraped_batting_wars', to: 'batting_stats#scraped_batting_wars'
+
+
 
 end
